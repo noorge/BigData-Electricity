@@ -3,3 +3,5 @@ target/
 *.log
 *.class
 .DS_Store
+# Ignore data files
+data/
