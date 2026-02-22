@@ -1,11 +1,12 @@
 import org.apache.spark.sql.SparkSession
-import preprocessing.Cleaning
+import preprocessing.{Cleaning, Reduction}
 
 object Main {
+
   def main(args: Array[String]): Unit = {
 
     val spark = SparkSession.builder()
-      .appName("BigData Project - Data Cleaning")
+      .appName("BigData Project - Cleaning and Reduction")
       .master("local[*]")
       .getOrCreate()
 
@@ -17,7 +18,7 @@ object Main {
     // ----------------------------
     // 1) Load + initial preprocessing
     // ----------------------------
-    val rawPath = "data/household_power_consumption.txt"
+    val rawPath = "data/raw/household_power_consumption.txt"
 
     val df0 = Cleaning.loadRaw(spark, rawPath)
     val df1 = Cleaning.replaceQuestionMarksWithNull(df0)
@@ -37,9 +38,9 @@ object Main {
     val castFailures = Cleaning.countCastFailures(dfTyped)
 
     val dupBefore = Cleaning.countFullRowDups(dfTyped)
-    val dfNoDup = Cleaning.dropFullRowDups(dfTyped)
+    val dfNoDup   = Cleaning.dropFullRowDups(dfTyped)
 
-    val rowsAfter = dfNoDup.count()
+    val rowsAfter        = dfNoDup.count()
     val rowsAfterMissing = dfClean.count()
 
     // ----------------------------
@@ -48,7 +49,7 @@ object Main {
     Cleaning.printOutlierReportIQR(dfNoDup)
 
     // ----------------------------
-    // 5) Report
+    // 5) Cleaning report
     // ----------------------------
     println("\n==============================")
     println("   DATA CLEANING SUMMARY")
@@ -72,13 +73,22 @@ object Main {
     println(s"Rows AFTER cleaning: $rowsAfter")
 
     // ----------------------------
-    // 6) Save
+    // 6) Save cleaned data (single CSV)
     // ----------------------------
-    val outPath = "file:///C:/Users/Noor/IdeaProjects/BigData-Electricity/data/cleaned/household_power"
+    val outPathClean = "data/cleaned/cleaned_household_power"
 
-    Cleaning.saveAsSingleCsv(dfNoDup, outPath)
+    Cleaning.saveAsSingleCsv(dfNoDup, outPathClean)(spark)
+    println(s"\nSaved cleaned dataset to: ${outPathClean}.csv")
 
-    println(s"\nSaved cleaned dataset to: $outPath")
+    // ----------------------------
+    // 7) Data reduction (sampling + aggregation + feature selection)
+    // ----------------------------
+    val outPathReduced = "data/reduced/reduced_household_power"
+
+    val dfReduced = Reduction.reduceAndSave(dfNoDup, outPathReduced)(spark)
+
+    println(s"Rows AFTER reduction: ${dfReduced.count()}")
+    println(s"Saved reduced dataset to: ${outPathReduced}.csv")
 
     // cleanup
     df2.unpersist()
