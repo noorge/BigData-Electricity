@@ -1,5 +1,5 @@
 import org.apache.spark.sql.SparkSession
-import preprocessing.{Cleaning, Reduction}
+import preprocessing.{Cleaning, Reduction, Transformation}
 
 object Main {
 
@@ -89,6 +89,19 @@ object Main {
 
     println(s"Rows AFTER reduction: ${dfReduced.count()}")
     println(s"Saved reduced dataset to: ${outPathReduced}.csv")
+
+    // ----------------------------
+    // 8) Transformation (type conversions + numeric encoding)
+    // ----------------------------
+    implicit val implicitSpark: SparkSession = spark
+
+    val outPathTransformed = "data/transformed/transformed_household_power"
+
+    val dfTransformed =
+      Transformation.transformAndSave(dfReduced, outPathTransformed)
+
+    println(s"Rows AFTER transformation: ${dfTransformed.count()}")
+    println(s"Saved transformed dataset to: ${outPathTransformed}.csv")
 
     // cleanup
     df2.unpersist()
