@@ -37,11 +37,50 @@ object Transformation {
 
     withMon
   }
+    /** 3) Add engineered feature: total_sub_metering */
+  def addEngineeredFeatures(df: DataFrame): DataFrame = {
+    df.withColumn(
+      "total_sub_metering",
+      col("avg_Sub_metering_1") +
+      col("avg_Sub_metering_2") +
+      col("avg_Sub_metering_3")
+    )
+  }
+
+    /** 4) Min-Max scaling for selected columns */
+  def minMaxScale(df: DataFrame, cols: Seq[String]): DataFrame = {
+    var tmpDf = df
+    for (c <- cols) {
+      val stats = tmpDf.agg(
+        min(col(c)).alias("min"),
+        max(col(c)).alias("max")
+      ).first()
+
+      val minVal = stats.getDouble(0)
+      val maxVal = stats.getDouble(1)
+
+      tmpDf = tmpDf.withColumn(
+        s"${c}_scaled",
+        (col(c) - lit(minVal)) / (lit(maxVal - minVal))
+      )
+    }
+    tmpDf
+  }
 
   /** Full transformation pipeline */
   def transform(df: DataFrame): DataFrame = {
     val withTime = addTimeDerivedColumns(df)
     oneHotEncodeDaysMonths(withTime)
+     val engineered  = addEngineeredFeatures(encoded)    
+    val colsToScale = Seq(
+      "avg_Global_active_power",
+      "avg_Voltage",
+      "avg_Global_intensity",
+      "total_sub_metering"
+    )
+    val scaled      = minMaxScale(engineered, colsToScale) 
+
+    scaled
   }
 
   /** Save as single CSV file */
