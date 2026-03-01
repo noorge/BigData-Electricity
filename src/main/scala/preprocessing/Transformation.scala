@@ -68,20 +68,25 @@ object Transformation {
   }
 
   /** Full transformation pipeline */
-  def transform(df: DataFrame): DataFrame = {
-    val withTime = addTimeDerivedColumns(df)
-    oneHotEncodeDaysMonths(withTime)
-     val engineered  = addEngineeredFeatures(encoded)    
-    val colsToScale = Seq(
-      "avg_Global_active_power",
-      "avg_Voltage",
-      "avg_Global_intensity",
-      "total_sub_metering"
-    )
-    val scaled      = minMaxScale(engineered, colsToScale) 
+ def transform(df: DataFrame): DataFrame = {
 
-    scaled
-  }
+  val withTime = addTimeDerivedColumns(df)
+
+  val encoded = oneHotEncodeDaysMonths(withTime)
+
+  val engineered = addEngineeredFeatures(encoded)
+
+  val colsToScale = Seq(
+    "avg_Global_active_power",
+    "avg_Voltage",
+    "avg_Global_intensity",
+    "total_sub_metering"
+  )
+
+  val scaled = minMaxScale(engineered, colsToScale)
+
+  scaled
+}
 
   /** Save as single CSV file */
   def saveAsSingleCsv(df: DataFrame, outPath: String)
