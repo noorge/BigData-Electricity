@@ -50,6 +50,47 @@ object RDDOperations {
         val cols = row.split(",")
         println(s"Row ${i + 1}: Time=${cols(0)}, Power=${cols(1)}")
     }
+      // -----------------------------
+      // 4. MAP (Transformation)
+      // -----------------------------
+      val hourPowerPairs = rows.map(line => {
+        val cols = line.split(",")
 
-  }
+        val hour = cols(8).toInt              // hour_of_day
+        val power = cols(1).toDouble          // avg_Global_active_power
+
+        (hour, power)
+      })
+
+      println("\n==============================")
+      println("RDD Transformation: MAP")
+      println("==============================")
+      println("Mapped each record into key-value pairs: (hour, power)")
+
+      // -----------------------------
+      // 5. REDUCEBYKEY (Transformation)
+      // -----------------------------
+      val hourlyConsumption = hourPowerPairs.reduceByKey(_ + _)
+
+      println("\n==============================")
+      println("RDD Transformation: REDUCEBYKEY")
+      println("==============================")
+      println("Aggregated total electricity consumption per hour")
+
+      // -----------------------------
+      // 6. COLLECT (Action)
+      // -----------------------------
+      println("\n==============================")
+      println("RDD Action: COLLECT")
+      println("==============================")
+
+      hourlyConsumption
+        .sortByKey()
+        .collect()
+        .zipWithIndex
+        .foreach {
+          case ((hour, total), i) =>
+            println(f"Row ${i + 1}: Hour=$hour%02d, Total_Power=$total%.4f")
+        }
+    }
 }
