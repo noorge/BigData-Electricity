@@ -92,6 +92,63 @@ object RDDOperations {
           case ((hour, total), i) =>
             println(f"Row ${i + 1}: Hour=$hour%02d, Total_Power=$total%.4f")
         }
+        // -----------------------------
+// 7. MAP (Transformation)
+// -----------------------------
+val categorizedUsage = rows.map(line => {
+  val cols = line.split(",")
+
+  val power = cols(1).toDouble   // avg_Global_active_power
+
+  val category =
+    if (power < 1) "Low"
+    else if (power < 3) "Medium"
+    else "High"
+
+  (category, 1)
+})
+
+println("\n==============================")
+println("RDD Transformation: MAP")
+println("==============================")
+println("Categorized electricity usage into Low / Medium / High")
+
+println("\nSample output after MAP:")
+categorizedUsage.take(5).zipWithIndex.foreach {
+  case ((category, count), i) =>
+    println(s"Row ${i + 1}: Category=$category, Count=$count")
+}
+
+// -----------------------------
+// 8. REDUCEBYKEY (Transformation)
+// -----------------------------
+val categoryCounts = categorizedUsage.reduceByKey(_ + _)
+
+println("\n==============================")
+println("RDD Transformation: REDUCEBYKEY")
+println("==============================")
+println("Counted number of records in each usage category")
+
+println("\nSample output after REDUCEBYKEY:")
+categoryCounts.take(5).zipWithIndex.foreach {
+  case ((category, total), i) =>
+    println(s"Row ${i + 1}: Category=$category, Total=$total")
+}
+
+// -----------------------------
+// 9. COLLECT (Action)
+// -----------------------------
+println("\n==============================")
+println("RDD Action: COLLECT")
+println("==============================")
+
+categoryCounts
+  .collect()
+  .zipWithIndex
+  .foreach {
+    case ((category, total), i) =>
+      println(s"Row ${i + 1}: Category=$category, Total_Records=$total")
+  }
     // -----------------------------
     // 10. MAP (Transformation)
     // -----------------------------
