@@ -20,7 +20,7 @@ object RDDOperations {
     // -----------------------------
     val highConsumption = rows.filter(line => {
       val cols = line.split(",")
-      cols(2).toDouble > 5.0
+      cols(1).toDouble > 5.0
     })
 
     println("\n==============================")
@@ -50,6 +50,8 @@ object RDDOperations {
         val cols = row.split(",")
         println(s"Row ${i + 1}: Time=${cols(0)}, Power=${cols(1)}")
     }
+
+    
       // -----------------------------
       // 4. MAP (Transformation)
       // -----------------------------
