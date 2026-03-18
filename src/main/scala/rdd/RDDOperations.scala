@@ -53,47 +53,68 @@ object RDDOperations {
 
     
       // -----------------------------
-      // 4. MAP (Transformation)
-      // -----------------------------
-      val hourPowerPairs = rows.map(line => {
-        val cols = line.split(",")
+// 4. MAP (Transformation)
+// -----------------------------
+val hourPowerPairs = rows.map(line => {
+  val cols = line.split(",")
 
-        val hour = cols(8).toInt              // hour_of_day
-        val power = cols(1).toDouble          // avg_Global_active_power
+  val hour = cols(8).toInt              // hour_of_day
+  val power = cols(1).toDouble          // avg_Global_active_power
 
-        (hour, power)
-      })
+  (hour, power)
+})
 
-      println("\n==============================")
-      println("RDD Transformation: MAP")
-      println("==============================")
-      println("Mapped each record into key-value pairs: (hour, power)")
+println("\n==============================")
+println("RDD Transformation: MAP")
+println("==============================")
+println("Mapped each record into key-value pairs: (hour, power)")
 
-      // -----------------------------
-      // 5. REDUCEBYKEY (Transformation)
-      // -----------------------------
-      val hourlyConsumption = hourPowerPairs.reduceByKey(_ + _)
+println("Sample records after MAP:")
+hourPowerPairs.take(3).zipWithIndex.foreach {
+  case ((hour, power), i) =>
+    println(f"Sample ${i + 1}: Hour=$hour%02d, Power=$power%.4f")
+}
 
-      println("\n==============================")
-      println("RDD Transformation: REDUCEBYKEY")
-      println("==============================")
-      println("Aggregated total electricity consumption per hour")
 
-      // -----------------------------
-      // 6. COLLECT (Action)
-      // -----------------------------
-      println("\n==============================")
-      println("RDD Action: COLLECT")
-      println("==============================")
+// -----------------------------
+// 5. GROUPBYKEY (Transformation)
+// -----------------------------
+val groupedHourlyConsumption = hourPowerPairs.groupByKey()
 
-      hourlyConsumption
-        .sortByKey()
-        .collect()
-        .zipWithIndex
-        .foreach {
-          case ((hour, total), i) =>
-            println(f"Row ${i + 1}: Hour=$hour%02d, Total_Power=$total%.4f")
-        }
+println("\n==============================")
+println("RDD Transformation: GROUPBYKEY")
+println("==============================")
+println("Grouped electricity consumption values by hour")
+
+// ✅ Clean sample (only show first value instead of full list)
+println("Sample records after GROUPBYKEY:")
+groupedHourlyConsumption.take(3).zipWithIndex.foreach {
+  case ((hour, values), i) =>
+    println(f"Sample ${i + 1}: Hour=$hour%02d, Example_Power=${values.head}%.4f")
+}
+
+
+// Convert to totals (so analysis still works)
+val hourlyConsumption = groupedHourlyConsumption.map {
+  case (hour, values) => (hour, values.sum)
+}
+
+
+// -----------------------------
+// 6. REDUCE (Action)
+// -----------------------------
+println("\n==============================")
+println("RDD Action: REDUCE")
+println("==============================")
+println("Identified the hour with the highest total electricity consumption")
+
+// ✅ Direct final result (no confusing samples)
+val maxConsumptionHour = hourlyConsumption.reduce {
+  case ((hour1, total1), (hour2, total2)) =>
+    if (total1 > total2) (hour1, total1) else (hour2, total2)
+}
+
+println(f"Result: Hour=${maxConsumptionHour._1}%02d, Total_Power=${maxConsumptionHour._2}%.4f")
     // -----------------------------
     // 10. MAP (Transformation)
     // -----------------------------
