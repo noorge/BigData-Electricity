@@ -1,5 +1,6 @@
 import org.apache.spark.sql.SparkSession
 import rdd.RDDOperations
+import sql.SQLOperations
 
 object Main {
 
@@ -17,7 +18,8 @@ object Main {
 
     // Run only Phase 3: RDD operations
     RDDOperations.run(spark)
-
+    // Run Phase 4: SQL operations
+    SQLOperations.run(spark)
     spark.stop()
   }
 }
