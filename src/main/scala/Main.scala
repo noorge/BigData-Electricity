@@ -17,7 +17,7 @@ object Main {
     spark.sparkContext.setLogLevel("ERROR")
 
     // Run only Phase 3: RDD operations
-    RDDOperations.run(spark)
+//    RDDOperations.run(spark)
     // Run Phase 4: SQL operations
     SQLOperations.run(spark)
     spark.stop()

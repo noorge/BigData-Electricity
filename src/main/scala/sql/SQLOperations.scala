@@ -46,5 +46,22 @@ object SQLOperations {
     """)
 
     query1.show(10, false)
+
+    // -----------------------------
+    // SQL QUERY 2: Statistical Summary
+    // -----------------------------
+    println("\n==============================")
+    println("SQL QUERY 2: Statistical Summary of Electricity Consumption")
+    println("==============================")
+
+    val query2 = spark.sql("""
+  SELECT
+    COUNT(DISTINCT date) AS unique_days,
+    AVG(avg_Global_active_power) AS mean_power,
+    VARIANCE(avg_Global_active_power) AS variance_power
+  FROM power_data
+""")
+
+    query2.show(false)
   }
 }
