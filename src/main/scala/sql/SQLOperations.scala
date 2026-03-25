@@ -60,8 +60,59 @@ object SQLOperations {
     AVG(avg_Global_active_power) AS mean_power,
     VARIANCE(avg_Global_active_power) AS variance_power
   FROM power_data
-""")
+   """)
 
     query2.show(false)
+
+  // -----------------------------
+// SQL QUERY 3: Rank Years by Average Power Consumption
+// -----------------------------
+println("\n==============================")
+println("SQL QUERY 3: Rank Years by Average Power Consumption")
+println("==============================")
+
+val query3 = spark.sql("""
+  SELECT 
+    year,
+    avg_power,
+    RANK() OVER (ORDER BY avg_power DESC) AS power_rank
+  FROM (
+    SELECT 
+      YEAR(date) AS year,
+      AVG(avg_Global_active_power) AS avg_power
+    FROM power_data
+    GROUP BY YEAR(date)
+  ) yearly_data
+  ORDER BY power_rank
+""")
+
+query3.show(false)
+// -----------------------------
+// SQL QUERY 4: Identify Days with Above-Average Consumption
+// -----------------------------
+println("\n==============================")
+println("SQL QUERY 4: Identify Days with Above-Average Consumption")
+println("==============================")
+
+val query4 = spark.sql("""
+  WITH daily_consumption AS (
+    SELECT 
+      date,
+      SUM(avg_Global_active_power) AS total_power
+    FROM power_data
+    GROUP BY date
+  )
+  
+  SELECT 
+    date,
+    total_power
+  FROM daily_consumption
+  WHERE total_power > (
+    SELECT AVG(total_power) FROM daily_consumption
+  )
+  ORDER BY total_power DESC
+""")
+
+query4.show(10, false)
   }
 }
