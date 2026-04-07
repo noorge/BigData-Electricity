@@ -1,7 +1,7 @@
 import org.apache.spark.sql.SparkSession
-import rdd.RDDOperations
-import sql.SQLOperations
-
+//import rdd.RDDOperations
+//import sql.SQLOperations
+//import ml.MLOperations
 object Main {
 
   def main(args: Array[String]): Unit = {
@@ -17,9 +17,11 @@ object Main {
     spark.sparkContext.setLogLevel("ERROR")
 
     // Run only Phase 3: RDD operations
-//    RDDOperations.run(spark)
+   //RDDOperations.run(spark)
     // Run Phase 4: SQL operations
-    SQLOperations.run(spark)
+    //SQLOperations.run(spark)
+    // Run Phase 5: Machine Learning
+     MLOperations.run(spark)
     spark.stop()
   }
 }
