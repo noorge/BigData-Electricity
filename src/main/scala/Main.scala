@@ -1,7 +1,6 @@
 import org.apache.spark.sql.SparkSession
-//import rdd.RDDOperations
-//import sql.SQLOperations
-//import ml.MLOperations
+import ml.MLOperations
+
 object Main {
 
   def main(args: Array[String]): Unit = {
@@ -16,12 +15,8 @@ object Main {
     Logger.getLogger("akka").setLevel(Level.ERROR)
     spark.sparkContext.setLogLevel("ERROR")
 
-    // Run only Phase 3: RDD operations
-   //RDDOperations.run(spark)
-    // Run Phase 4: SQL operations
-    //SQLOperations.run(spark)
-    // Run Phase 5: Machine Learning
-     MLOperations.run(spark)
+    MLOperations.run(spark)
+
     spark.stop()
   }
 }
