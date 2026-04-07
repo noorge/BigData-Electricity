@@ -114,5 +114,42 @@ val query4 = spark.sql("""
 """)
 
 query4.show(10, false)
+// -----------------------------
+    // SQL QUERY 5: Highest Average Consumption Month in Each Year
+    // -----------------------------
+    println("\n==============================")
+    println("SQL QUERY 5: Highest Average Consumption Month in Each Year")
+    println("==============================")
+
+    val query5 = spark.sql("""
+      WITH monthly_avg AS (
+        SELECT
+          YEAR(date) AS year,
+          MONTH(date) AS month,
+          AVG(avg_Global_active_power) AS avg_power
+        FROM power_data
+        GROUP BY YEAR(date), MONTH(date)
+      ),
+      ranked_months AS (
+        SELECT
+          year,
+          month,
+          avg_power,
+          ROW_NUMBER() OVER (
+            PARTITION BY year
+            ORDER BY avg_power DESC
+          ) AS month_rank
+        FROM monthly_avg
+      )
+      SELECT
+        year,
+        month,
+        avg_power
+      FROM ranked_months
+      WHERE month_rank = 1
+      ORDER BY year
+    """)
+
+    query5.show(false)
   }
 }

@@ -86,7 +86,7 @@ println("RDD Transformation: GROUPBYKEY")
 println("==============================")
 println("Grouped electricity consumption values by hour")
 
-// ✅ Clean sample (only show first value instead of full list)
+// Clean sample (only shows first value)
 println("Sample records after GROUPBYKEY:")
 groupedHourlyConsumption.take(3).zipWithIndex.foreach {
   case ((hour, values), i) =>
@@ -108,7 +108,7 @@ println("RDD Action: REDUCE")
 println("==============================")
 println("Identified the hour with the highest total electricity consumption")
 
-// ✅ Direct final result (no confusing samples)
+// Direct final result 
 val maxConsumptionHour = hourlyConsumption.reduce {
   case ((hour1, total1), (hour2, total2)) =>
     if (total1 > total2) (hour1, total1) else (hour2, total2)
