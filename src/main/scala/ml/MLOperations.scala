@@ -165,5 +165,12 @@ object MLOperations {
     } else {
       println("The Linear Regression model does not explain more variance than the baseline.")
     }
+
+    val featureNames = Array("avg_Voltage", "avg_Global_intensity", "total_sub_metering")
+println("\nModel Coefficients (on scaled features):")
+featureNames.zip(lrModel.coefficients.toArray).foreach {
+  case (name, coef) => println(f"  $name%-30s -> $coef%.6f")
+}
+println(f"  Intercept: ${lrModel.intercept}%.6f")
   }
 }
