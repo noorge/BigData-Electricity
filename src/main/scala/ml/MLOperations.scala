@@ -85,11 +85,12 @@ object MLOperations {
     import org.apache.spark.ml.evaluation.RegressionEvaluator
     import org.apache.spark.sql.functions._
 
-    // Generate predictions on test set
-    val predictions = lrModel.transform(finalTest)
+    // Generate predictions on training and test sets
+    val trainPredictions = lrModel.transform(finalTrain)
+    val testPredictions = lrModel.transform(finalTest)
 
-    println("Sample predictions:")
-    predictions
+    println("Sample test predictions:")
+    testPredictions
       .select("avg_Global_active_power", "prediction")
       .show(10, truncate = false)
 
@@ -109,10 +110,20 @@ object MLOperations {
       .setPredictionCol("prediction")
       .setMetricName("r2")
 
-    val testRMSE = rmseEvaluator.evaluate(predictions)
-    val testMAE = maeEvaluator.evaluate(predictions)
-    val testR2 = r2Evaluator.evaluate(predictions)
+    val trainRMSE = rmseEvaluator.evaluate(trainPredictions)
+    val trainMAE = maeEvaluator.evaluate(trainPredictions)
+    val trainR2 = r2Evaluator.evaluate(trainPredictions)
 
+    val testRMSE = rmseEvaluator.evaluate(testPredictions)
+    val testMAE = maeEvaluator.evaluate(testPredictions)
+    val testR2 = r2Evaluator.evaluate(testPredictions)
+
+    println("\nTraining Metrics:")
+    println(f"Train RMSE: $trainRMSE%.4f")
+    println(f"Train MAE : $trainMAE%.4f")
+    println(f"Train R²  : $trainR2%.4f")
+
+    println("\nTest Metrics:")
     println(f"Test RMSE: $testRMSE%.4f")
     println(f"Test MAE : $testMAE%.4f")
     println(f"Test R²  : $testR2%.4f")
